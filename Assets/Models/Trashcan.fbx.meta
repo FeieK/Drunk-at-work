@@ -1,24 +1,9 @@
 fileFormatVersion: 2
-guid: 00cf8b437d7beda43804b317e4842029
+guid: bb90bd2f3e191bd4ebd8b9874e03b89c
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Black
-    second: {fileID: 2100000, guid: 6c480992257e2554e9a45b1c04d47b05, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: CanMetal
-    second: {fileID: 2100000, guid: df45d2bd32fdddd47945c1b0848c17b9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: CanSide
-    second: {fileID: 2100000, guid: 4bd6ad873edc212499aa8628c4d869a1, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
