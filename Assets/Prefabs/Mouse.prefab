@@ -69,7 +69,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -2184415926412715610, guid: 004e0aa0f1e419b41afed76d04619e20, type: 3}
-  - {fileID: -1580535799172915004, guid: 00cf8b437d7beda43804b317e4842029, type: 3}
+  - {fileID: -1580535799172915004, guid: 004e0aa0f1e419b41afed76d04619e20, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -141,6 +141,7 @@ MonoBehaviour:
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
   _forceKinematicDisabled: 0
+  gameManagerObj: {fileID: 0}
 --- !u!65 &1614953427969826408
 BoxCollider:
   m_ObjectHideFlags: 0

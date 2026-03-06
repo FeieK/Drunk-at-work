@@ -6,23 +6,23 @@ using UnityEngine;
 public class BeerCan : MonoBehaviour
 {
     [SerializeField]
-    private Outline outlineScript;
+    private bool isLeaveCan;
 
     private Animator animator;
     private int toutchingHandCount;
 
-
     public Boolean isOpen;
-
-
-
+    public Outline outlineScript;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        GameController gameController = GameController.instance;
         outlineScript.enabled = false;
         animator = GetComponent<Animator>();
         toutchingHandCount = 0;
+        if (!GameController.instance.canGrabBeerCans && !isLeaveCan)
+        {
+            GetComponent<Grabbable>().enabled = false;
+        }
     }
 
     // Update is called once per frame
@@ -32,34 +32,37 @@ public class BeerCan : MonoBehaviour
         {
             if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) == 1 || OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) == 1)
             {
-                OpenBeer();
+                if (!isLeaveCan)
+                {
+                    OpenBeer();
+                }
+                else
+                {
+                    GameController.Restart();
+                }
             }
         }
     }
 
     void OpenBeer()
     {
-        if (!isOpen)
+        if (!isOpen && GameController.instance.gameIsPlaying)
         {
             isOpen = true;
             animator.SetTrigger("OpenBeer");
+            GameController.instance.threadLevel += 5;
         }
     }
 
-
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (other.tag == "Interact")
         {
-            toutchingHandCount++;
+            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) == 1 || OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) == 1)
+            {
+                OpenBeer();
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.tag == "Interact")
-        {
-            toutchingHandCount--;
-        }
-    }
 }

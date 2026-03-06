@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using Oculus.Interaction;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -26,7 +29,11 @@ public class ManagerBehaviour : MonoBehaviour
     [SerializeField]
     private Color greenScanColor;
     [SerializeField]
+    private Color greenEmisionScanColor;
+    [SerializeField]
     private Color redScanColor;
+    [SerializeField]
+    private Color redEmisionScanColor;
     [SerializeField]
     private float walkSpeed;
     [SerializeField]
@@ -35,10 +42,20 @@ public class ManagerBehaviour : MonoBehaviour
     private float rayWidth;
     [SerializeField]
     private float rayLenght;
+    [SerializeField]
+    private GameObject noBeerPaperHand;
+    [SerializeField]
+    private GameObject noBeerPapersWallParent;
 
     private GotoPos gotoPos;
     private Material scannerMaterial;
-    private GameController gameController;
+    private bool firstCycle;
+
+    private bool foundCan;
+    private GameObject foundCanParent;
+    private GameObject foundCanModel;
+
+    public bool showScanGizmo;
 
 
     private enum GotoPos
@@ -51,10 +68,12 @@ public class ManagerBehaviour : MonoBehaviour
     }
     void Start()
     {
-        gameController = GameController.instance;
         scannerMaterial = scannerObj.GetComponent<MeshRenderer>().material;
         scannerObj.SetActive(false);
-
+        noBeerPaperHand.SetActive(false);
+        noBeerPapersWallParent.SetActive(false);
+        firstCycle = true;
+        foundCan = false;
         gotoPos = GotoPos.STANDBY;
 
     }
@@ -101,6 +120,7 @@ public class ManagerBehaviour : MonoBehaviour
                 {
                     Vector3 toPos = GetV3Pos(standbyPos);
                     transform.position = toPos;
+                    scannerObj.transform.localRotation = Quaternion.Euler(startScanAngle, 0, 0);
                     gotoPos = GotoPos.WAIT;
                     return;
                 }
@@ -119,15 +139,17 @@ public class ManagerBehaviour : MonoBehaviour
 
     IEnumerator Scan()
     {
-        yield return new WaitForSeconds(Random.Range(0f, 2f));
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 2f));
         scannerObj.SetActive(true);
         bool scanning = true;
+        foundCan = false;
         float rotation = 75;
+        GameController gameController = GameController.instance;
         while (scanning)
         {
             rotation += scanSpeed * Time.deltaTime;
             float finalRotation = Mathf.Clamp(rotation, startScanAngle, endScanAngle);
-            scannerObj.transform.localRotation = Quaternion.Euler(finalRotation, 7.17f, 0);
+            scannerObj.transform.localRotation = Quaternion.Euler(finalRotation, 0, 0);
 
             for (float ray = 0; ray <= raysAmount; ray++)
             {
@@ -140,12 +162,25 @@ public class ManagerBehaviour : MonoBehaviour
                 {
                     if (hit.collider.CompareTag("BeerCan"))
                     {
-                        Outline outline = hit.collider.GetComponent<Outline>();
+                        foundCanParent = hit.collider.transform.parent.gameObject;
+                        foundCanModel = hit.collider.gameObject;
+                        foundCan = true;
+                        Outline outline = foundCanModel.GetComponent<Outline>();
                         outline.enabled = true;
                         scannerMaterial.color = redScanColor;
+                        scannerMaterial.SetColor("_EmissionColor", redEmisionScanColor);
                         yield return new WaitForSeconds(5);
                         scanning = false;
-                        gameController.timesCought += 1; // Its not grabbing this for some reason???
+
+                        if (firstCycle)
+                        {
+                            noBeerPaperHand.SetActive(true);
+                        }
+                        else
+                        {
+                            gameController.negativePoints += 800;
+                            gameController.deductionPercent += 20;
+                        }
                     }
 
                 }
@@ -156,7 +191,46 @@ public class ManagerBehaviour : MonoBehaviour
         }
         scannerObj.SetActive(false);
         scannerMaterial.color = greenScanColor;
-        yield return new WaitForSeconds(Random.Range(0f, 2f));
+        scannerMaterial.SetColor("_EmissionColor", greenEmisionScanColor);
+
+        if (firstCycle)
+        {
+            noBeerPaperHand.SetActive(true);
+        }
+
+        yield return new WaitForSeconds(UnityEngine.Random.Range(5f, 10f));
+        if (foundCan)
+        {
+            foundCanParent.GetComponent<Rigidbody>().useGravity = false;
+            foundCanParent.transform.position = new Vector3(5, 0, 20);
+            foundCanModel.SetActive(false);
+        }
+        else
+        {
+            gameController.scansSurvived += 1;
+        }
+        if (firstCycle)
+        {
+            noBeerPaperHand.SetActive(false);
+            noBeerPapersWallParent.SetActive(true);
+            gameController.StartGame();
+            firstCycle = false;
+        }
         gotoPos = GotoPos.END;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (showScanGizmo)
+        {
+            Gizmos.color = Color.blue;
+            for (float ray = 0; ray <= raysAmount; ray++)
+            {
+                float singleAngle = (rayWidth * 2) / raysAmount;
+                float rayAngle = (singleAngle * ray) - rayWidth;
+                Vector3 targetPoint = new Vector3(rayAngle, rayLenght, 0);
+                Gizmos.DrawRay(scannerObj.transform.position, scannerObj.transform.TransformDirection(targetPoint));
+            }
+        }
     }
 }
