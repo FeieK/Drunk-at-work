@@ -282,8 +282,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a265656717ffd324daaf73c999832a40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  outlineScript: {fileID: 8477897604098671592}
   isOpen: 0
+  outlineScript: {fileID: 8477897604098671592}
+  canDrink: 1
 --- !u!95 &5142444162334498210
 Animator:
   serializedVersion: 7

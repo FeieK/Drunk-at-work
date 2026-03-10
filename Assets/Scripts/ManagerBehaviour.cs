@@ -1,11 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Oculus.Interaction;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.InputSystem.LowLevel.InputStateHistory;
 
 public class ManagerBehaviour : MonoBehaviour
 {
@@ -26,6 +21,8 @@ public class ManagerBehaviour : MonoBehaviour
     private float scanSpeed;
     [SerializeField]
     private GameObject scannerObj;
+    [SerializeField]
+    private LayerMask ignoredLayer;
     [SerializeField]
     private Color greenScanColor;
     [SerializeField]
@@ -51,9 +48,9 @@ public class ManagerBehaviour : MonoBehaviour
     private Material scannerMaterial;
     private bool firstCycle;
 
+
     private bool foundCan;
-    private GameObject foundCanParent;
-    private GameObject foundCanModel;
+    private List<GameObject> foundBeerCans = new List<GameObject>();
 
     public bool showScanGizmo;
 
@@ -120,16 +117,16 @@ public class ManagerBehaviour : MonoBehaviour
                 {
                     Vector3 toPos = GetV3Pos(standbyPos);
                     transform.position = toPos;
-                    scannerObj.transform.localRotation = Quaternion.Euler(startScanAngle, 0, 0);
+                    scannerObj.transform.rotation = Quaternion.Euler(startScanAngle, 0, 0);
                     gotoPos = GotoPos.WAIT;
                     return;
                 }
         }
     }
 
-    public void TriggerWalk()
+    public void TriggerWalk(bool forceWalk = false)
     {
-        gotoPos = GotoPos.START;
+        if (gotoPos == GotoPos.STANDBY || forceWalk) gotoPos = GotoPos.START;
     }
 
     private Vector3 GetV3Pos(Vector2 pos)
@@ -139,7 +136,7 @@ public class ManagerBehaviour : MonoBehaviour
 
     IEnumerator Scan()
     {
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 2f));
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 2f));
         scannerObj.SetActive(true);
         bool scanning = true;
         foundCan = false;
@@ -149,7 +146,7 @@ public class ManagerBehaviour : MonoBehaviour
         {
             rotation += scanSpeed * Time.deltaTime;
             float finalRotation = Mathf.Clamp(rotation, startScanAngle, endScanAngle);
-            scannerObj.transform.localRotation = Quaternion.Euler(finalRotation, 0, 0);
+            scannerObj.transform.rotation = Quaternion.Euler(finalRotation, 0, 0);
 
             for (float ray = 0; ray <= raysAmount; ray++)
             {
@@ -158,28 +155,20 @@ public class ManagerBehaviour : MonoBehaviour
                 Vector3 targetPoint = new Vector3(rayAngle, rayLenght, 0);
                 RaycastHit hit;
 
-                if (Physics.Raycast(scannerObj.transform.position, scannerObj.transform.TransformDirection(targetPoint), out hit, Mathf.Infinity))
+                if (Physics.Raycast(scannerObj.transform.position, scannerObj.transform.TransformDirection(targetPoint), out hit, Mathf.Infinity, ~ignoredLayer))
                 {
+
                     if (hit.collider.CompareTag("BeerCan"))
                     {
-                        foundCanParent = hit.collider.transform.parent.gameObject;
-                        foundCanModel = hit.collider.gameObject;
-                        foundCan = true;
-                        Outline outline = foundCanModel.GetComponent<Outline>();
-                        outline.enabled = true;
-                        scannerMaterial.color = redScanColor;
-                        scannerMaterial.SetColor("_EmissionColor", redEmisionScanColor);
-                        yield return new WaitForSeconds(5);
-                        scanning = false;
-
-                        if (firstCycle)
+                        GameObject model = hit.collider.gameObject;
+                        if (!foundBeerCans.Contains(model))
                         {
-                            noBeerPaperHand.SetActive(true);
-                        }
-                        else
-                        {
-                            gameController.negativePoints += 800;
-                            gameController.deductionPercent += 20;
+                            foundBeerCans.Add(model);
+                            foundCan = true;
+                            Outline outline = model.GetComponent<Outline>();
+                            outline.enabled = true;
+                            scannerMaterial.color = redScanColor;
+                            scannerMaterial.SetColor("_EmissionColor", redEmisionScanColor);
                         }
                     }
 
@@ -201,9 +190,17 @@ public class ManagerBehaviour : MonoBehaviour
         yield return new WaitForSeconds(UnityEngine.Random.Range(5f, 10f));
         if (foundCan)
         {
-            foundCanParent.GetComponent<Rigidbody>().useGravity = false;
-            foundCanParent.transform.position = new Vector3(5, 0, 20);
-            foundCanModel.SetActive(false);
+            foreach (GameObject model in foundBeerCans)
+            {
+                GameObject parent = model.transform.parent.gameObject;
+                parent.GetComponent<Rigidbody>().useGravity = false;
+                parent.transform.position = new Vector3(5, 0, 20);
+                model.SetActive(false);
+
+                gameController.negativePoints += 60;
+                gameController.deductionPercent += 20;
+            }
+            foundBeerCans.Clear();
         }
         else
         {

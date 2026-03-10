@@ -25,6 +25,7 @@ public class BeerCrate : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other.tag == "Interact") Debug.Log("It enters");
         if (other.tag == "Interact" && !ghostExists && GameController.instance.gameIsPlaying)
         {
             beerCanGhost = Instantiate(beerCanPrefab, other.transform.position, Quaternion.identity, interactibles);
@@ -37,6 +38,7 @@ public class BeerCrate : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        if (other.tag == "Interact") Debug.Log("It stays");
         if (other.tag == "Interact" && GameController.instance.gameIsPlaying)
         {
             isBeingHeld = beerCanGrabbable.SelectingPointsCount != 0;
@@ -50,6 +52,7 @@ public class BeerCrate : MonoBehaviour
     }
     private void OnTriggerExit(Collider other)
     {
+        if (other.tag == "Interact") Debug.Log("It leaves");
         if (other.tag == "Interact")
         {
             if (ghostExists)

@@ -26,7 +26,8 @@ public class Clock : MonoBehaviour
     {
         if (grabbable.SelectingPointsCount > 0 && !rb.useGravity && rb.isKinematic)
         {
-            rb.isKinematic = false;
+            rb.constraints = RigidbodyConstraints.None;
+            rb.useGravity = true;
         }
     }
 

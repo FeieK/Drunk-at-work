@@ -1,13 +1,10 @@
 using System.Collections;
+using System.Collections.Generic;
 using Oculus.Interaction.Locomotion;
 using TMPro;
-using Unity.VisualScripting;
-using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.XR;
-using UnityEngine.XR.OpenXR;
 
 public class GameController : MonoBehaviour
 {
@@ -57,6 +54,7 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private TextMeshPro firedTotalPoints;
 
+
     [SerializeField]
     private Image sreenDarkenImage;
 
@@ -90,32 +88,38 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (OVRInput.GetDown(OVRInput.Button.Start))
+        if (OVRInput.GetDown(OVRInput.Button.Start) || Input.GetKeyDown(KeyCode.I))
         {
             holdSettingsTime = 0;
             isHolding = false;
         }
-        if (OVRInput.Get(OVRInput.Button.Start))
+        if (OVRInput.Get(OVRInput.Button.Start) || Input.GetKey(KeyCode.I))
         {
             holdSettingsTime += Time.deltaTime;
 
             if (holdSettingsTime > 1 && !isHolding)
             {
                 isHolding = true;
-                Teleport(Vector2.zero);
+                if (!hasTriggeredEnding)
+                {
+                    Teleport(Vector2.zero);
+                }
+                else
+                {
+                    Restart();
+                }
             }
         }
 
-        if (OVRInput.GetUp(OVRInput.Button.Start))
+        if (OVRInput.GetUp(OVRInput.Button.Start) || Input.GetKeyUp(KeyCode.I))
         {
-            if (!isHolding)
+            if (!isHolding && !hasTriggeredEnding && gameIsPlaying)
             {
                 OpenInfoMenu();
             }
         }
 
         if (Input.GetKey(KeyCode.N) && !hasTriggeredEnding) StartCoroutine(TriggerEnding());
-        if (Input.GetKey(KeyCode.I) && gameIsPlaying) OpenInfoMenu();
 
         if (deductionPercent >= 100 && !hasTriggeredEnding) StartCoroutine(TriggerEnding());
     }
@@ -131,14 +135,13 @@ public class GameController : MonoBehaviour
     IEnumerator Delay()
     {
         yield return new WaitForSeconds(1);
-        Debug.Log("Teleporting...");
         Teleport(Vector2.zero);
     }
 
     IEnumerator FirstManagerCycle()
     {
         yield return new WaitForSeconds(5);
-        manager.TriggerWalk();
+        manager.TriggerWalk(true);
     }
     IEnumerator TryManagerCycle()
     {
@@ -177,7 +180,8 @@ public class GameController : MonoBehaviour
         float alpha = 0;
 
         bool fadingIn = true;
-        while (fadingIn) {
+        while (fadingIn)
+        {
             alpha += 0.01f;
             sreenDarkenImage.color = new Color(0, 0, 0, alpha);
             yield return new WaitForEndOfFrame();
@@ -194,7 +198,7 @@ public class GameController : MonoBehaviour
         totalPoints = (beersDrunk * 35) + (minutesSurvived * 2) + (scansSurvived * 25) - negativePoints;
         firedTotalPoints.text = $"Total: {totalPoints}";
 
-        Teleport(new Vector2(0, -75));
+        Teleport(new Vector2(0, -74));
         yield return new WaitForSeconds(1);
         bool fadingOut = true;
         while (fadingOut)
@@ -209,19 +213,21 @@ public class GameController : MonoBehaviour
     private void OpenInfoMenu()
     {
         UpdateGameInfo();
+        hasGameInfoOpen = !hasGameInfoOpen;
         if (hasGameInfoOpen)
         {
-            //gameInfoObj.transform.position = new Vector3(x, y, z); // Pos infront of camera
+            gameInfoObj.transform.position = head.transform.position + head.transform.forward * 1;
+            gameInfoObj.transform.rotation = head.transform.rotation * Quaternion.Euler(-90, 0, 0);
         }
         else
         {
-            //gameInfoObj.transform.position = new Vector3(0, 20, 0);
+            gameInfoObj.transform.position = new Vector3(0, 20, 0);
         }
-        hasGameInfoOpen = !hasGameInfoOpen;
     }
 
     private void Teleport(Vector2 newPos)
     {
+        Debug.Log("Teleporting...");
         Vector3 headOffset = rig.position - head.position;
         rig.position = new Vector3(newPos.x, head.position.y, newPos.y) + headOffset;
     }
