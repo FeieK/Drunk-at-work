@@ -216,7 +216,7 @@ public class GameController : MonoBehaviour
         hasGameInfoOpen = !hasGameInfoOpen;
         if (hasGameInfoOpen)
         {
-            gameInfoObj.transform.position = head.transform.position + head.transform.forward * 1;
+            gameInfoObj.transform.position = head.transform.position + head.transform.forward * .5f;
             gameInfoObj.transform.rotation = head.transform.rotation * Quaternion.Euler(-90, 0, 0);
         }
         else

@@ -1,4 +1,5 @@
 Shader "Custom/Cutoff_ObjectSpace"
+// FYI: This shader was made using AI. I don't know anything about shading, nor do I know someone that does
 {
     Properties
     {
@@ -21,10 +22,17 @@ Shader "Custom/Cutoff_ObjectSpace"
             #pragma fragment frag
             #pragma target 3.0
 
+            // Required for VR instancing
+            #pragma multi_compile_instancing
+
+            #include "UnityCG.cginc"
+
             struct appdata
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
+
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
@@ -32,6 +40,8 @@ Shader "Custom/Cutoff_ObjectSpace"
                 float4 pos : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float3 objPos : TEXCOORD1;
+
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             sampler2D _MainTex;
@@ -41,6 +51,9 @@ Shader "Custom/Cutoff_ObjectSpace"
             v2f vert(appdata v)
             {
                 v2f o;
+
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
                 o.pos = UnityObjectToClipPos(v.vertex);
 
@@ -71,6 +84,7 @@ Shader "Custom/Cutoff_ObjectSpace"
 
                 return col;
             }
+
             ENDCG
         }
     }

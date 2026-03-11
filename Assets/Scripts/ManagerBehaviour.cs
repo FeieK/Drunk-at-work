@@ -44,6 +44,7 @@ public class ManagerBehaviour : MonoBehaviour
     [SerializeField]
     private GameObject noBeerPapersWallParent;
 
+    [SerializeField]
     private GotoPos gotoPos;
     private Material scannerMaterial;
     private bool firstCycle;
@@ -126,7 +127,7 @@ public class ManagerBehaviour : MonoBehaviour
 
     public void TriggerWalk(bool forceWalk = false)
     {
-        if (gotoPos == GotoPos.STANDBY || forceWalk) gotoPos = GotoPos.START;
+        if (gotoPos == GotoPos.WAIT || forceWalk) gotoPos = GotoPos.START;
     }
 
     private Vector3 GetV3Pos(Vector2 pos)
