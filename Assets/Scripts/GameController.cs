@@ -119,7 +119,6 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if (Input.GetKey(KeyCode.N) && !hasTriggeredEnding) StartCoroutine(TriggerEnding());
 
         if (deductionPercent >= 100 && !hasTriggeredEnding) StartCoroutine(TriggerEnding());
     }
