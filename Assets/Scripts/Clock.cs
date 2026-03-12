@@ -24,7 +24,7 @@ public class Clock : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (grabbable.SelectingPointsCount > 0 && !rb.useGravity && rb.isKinematic)
+        if (grabbable.SelectingPointsCount > 0 && !rb.useGravity)
         {
             rb.constraints = RigidbodyConstraints.None;
             rb.useGravity = true;

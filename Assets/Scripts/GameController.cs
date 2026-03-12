@@ -88,12 +88,12 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (OVRInput.GetDown(OVRInput.Button.Start) || Input.GetKeyDown(KeyCode.I))
+        if (OVRInput.GetDown(OVRInput.Button.Start))
         {
             holdSettingsTime = 0;
             isHolding = false;
         }
-        if (OVRInput.Get(OVRInput.Button.Start) || Input.GetKey(KeyCode.I))
+        if (OVRInput.Get(OVRInput.Button.Start))
         {
             holdSettingsTime += Time.deltaTime;
 
@@ -111,7 +111,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if (OVRInput.GetUp(OVRInput.Button.Start) || Input.GetKeyUp(KeyCode.I))
+        if (OVRInput.GetUp(OVRInput.Button.Start))
         {
             if (!isHolding && !hasTriggeredEnding && gameIsPlaying)
             {

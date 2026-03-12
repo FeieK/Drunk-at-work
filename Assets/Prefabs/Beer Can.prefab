@@ -283,8 +283,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isOpen: 0
-  outlineScript: {fileID: 8477897604098671592}
   canDrink: 1
+  outlineScript: {fileID: 8477897604098671592}
 --- !u!95 &5142444162334498210
 Animator:
   serializedVersion: 7
@@ -319,7 +319,7 @@ GameObject:
   - component: {fileID: 42551523081967105}
   - component: {fileID: 8929184142212456376}
   - component: {fileID: 8477897604098671592}
-  m_Layer: 7
+  m_Layer: 3
   m_Name: Can
   m_TagString: BeerCan
   m_Icon: {fileID: 0}

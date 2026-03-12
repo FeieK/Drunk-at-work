@@ -16,6 +16,8 @@ public class BeerCan : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        isOpen = false;
+        canDrink = false;
         outlineScript.enabled = false;
         animator = GetComponent<Animator>();
         grabbable = GetComponent<Grabbable>();
@@ -42,6 +44,7 @@ public class BeerCan : MonoBehaviour
         if (!isOpen && GameController.instance.gameIsPlaying)
         {
             isOpen = true;
+            canDrink = true;
             animator.SetTrigger("OpenBeer");
             GameController.instance.threadLevel += 5;
         }

@@ -198,8 +198,11 @@ public class ManagerBehaviour : MonoBehaviour
                 parent.transform.position = new Vector3(5, 0, 20);
                 model.SetActive(false);
 
-                gameController.negativePoints += 60;
-                gameController.deductionPercent += 20;
+                if (!firstCycle)
+                {
+                    gameController.negativePoints += 60;
+                    gameController.deductionPercent += 20;
+                }
             }
             foundBeerCans.Clear();
         }
